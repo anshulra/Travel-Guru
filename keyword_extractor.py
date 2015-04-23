@@ -1,6 +1,6 @@
 from __future__ import print_function
 from alchemyapi import AlchemyAPI
-import sys,json,glob,nltk
+import sys,json,glob,nltk,re
 
 
 
@@ -31,9 +31,8 @@ def extract_keywords():
 		loc = file_in
 		loc_hash[loc] = {}
 		
-		text = f_obj.read().replace("\n","")
+		text = f_obj.read()
 		text = text.replace("*******************","")
-		text = text.lower()
 		doc_len = len(text)
 		text_words = text.split()
 		unigrams_freq = nltk.FreqDist(text_words)
@@ -64,13 +63,16 @@ def extract_keywords():
 					
 		else:
     			print('Error in keyword extaction call for file :' + file_in + " : " + response['statusInfo'])
+		myRE = re.compile('^[a-zA-Z]+$')		
 		for keyword in loc_hash[loc]["keywords"]:
 			words = keyword.split()
 			if (len(words) > 1):
-				t = (words[0],words[1])
-				freq = bigrams_freq[t]
+				if (re.match(words[0]) && re.match(words[1])):
+					t = (words[0],words[1])
+					freq = bigrams_freq[t]
 			else:
-				freq = unigrams_freq[words[0]]
+				if (re.match(words[0]))
+					freq = unigrams_freq[words[0]]
 			
 			loc_hash[loc]["keywords"][keyword] = freq	
 		
