@@ -7,7 +7,7 @@ import sys,json,glob,nltk,re
 # dumps keywords of all locations into the output file. (JSON) 
 # structure of JSON : 
 # 		    "location" => { => doc_length =>
-#				    => keywords => { word,TF,relevence }
+#				    => keywords => { word => TF}
 #
 #
 
@@ -28,7 +28,7 @@ def extract_keywords():
 	for file_in in glob.glob(dir_name+"/*.txt"):
 		word_count = {}
 		f_obj = open(file_in)
-		loc = file_in
+		loc = file_in.split("/")[1].split(".")[0]
 		loc_hash[loc] = {}
 		
 		text = f_obj.read()
@@ -67,11 +67,12 @@ def extract_keywords():
 		for keyword in loc_hash[loc]["keywords"]:
 			words = keyword.split()
 			if (len(words) > 1):
-				if (re.match(words[0]) && re.match(words[1])):
-					t = (words[0],words[1])
-					freq = bigrams_freq[t]
+				if (re.match(myRE,words[0])):
+					if (re.match(myRE,words[1])):
+						t = (words[0],words[1])
+						freq = bigrams_freq[t]
 			else:
-				if (re.match(words[0]))
+				if (re.match(myRE,words[0])):
 					freq = unigrams_freq[words[0]]
 			
 			loc_hash[loc]["keywords"][keyword] = freq	
