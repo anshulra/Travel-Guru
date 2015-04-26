@@ -48,6 +48,8 @@ def extract_keywords():
 			loc_hash[loc]["keywords"] = {}
 			for keyword in response['keywords']:
 				words = keyword['text'].split()
+				if len(words) < 2:
+					words = keyword['text'].split("/")
 				if (len(words) <= 2):
 					loc_hash[loc]["keywords"][keyword['text']] = 0
 				if len(words) > 1:
