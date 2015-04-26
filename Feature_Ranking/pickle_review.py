@@ -1,4 +1,4 @@
-import os,sys,nltk,re
+import os,sys,nltk,re,pickle
 
 def crawlData(sourceDir, destDir):
 	sourceFiles = os.listdir(sourceDir)
@@ -6,7 +6,7 @@ def crawlData(sourceDir, destDir):
 	for file in sourceFiles:
 		filepath = sourceDir+"/"+file;
 		inFile = open(filepath,'r')
-		data = ""
+		data = []
 		result = ""
 		rating = 0
 		skipLine = False
@@ -21,10 +21,13 @@ def crawlData(sourceDir, destDir):
 				foundreview = line.find('<p itemprop="description" lang="en">',0)
 				if foundreview > -1:
 					review = html_tags.sub(' ',line)
-					
+					review = nltk.sent_tokenize(review)
+					review = [nltk.word_tokenize(sent) for sent in review]
+					review = [nltk.pos_tag(sent) for sent in review]
+					data.append([rating,review])
 					skipLine = False
-		outFile = open(destDir+"/"+file,'w')
-		outFile.write(result)
+		outFile = open(destDir+"/"+file,'wb')
+		pickle.dump(data,outFile)
 		outFile.close()
 		inFile.close()
 
