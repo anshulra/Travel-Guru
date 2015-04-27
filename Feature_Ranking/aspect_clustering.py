@@ -1,10 +1,9 @@
 #implementation of PLSA for clustering aspects
 import os,sys,pickle,random
-
-def cluster_aspects(sourceDir, destDir):
+def clusterAspects(sourceDir, destDir):
 	sourceFiles = os.listdir(sourceDir)
 	count = 0
-	naspects = 8	
+	naspects = 8
 	for file in sourceFiles:
 		filepath = sourceDir+"/"+file;
 		data = pickle.load(open(filepath,'rb'))
@@ -17,12 +16,12 @@ def cluster_aspects(sourceDir, destDir):
 		for review in data:
 			for pair in review[1]:
 				if not pair[0].lower() in modifiers:
-					modifiers[pair[0].lower()] = count_m
-					rev_modifiers.append(pair[0].lower())
+					modifiers[pair[0]] = count_m
+					rev_modifiers.append(pair[0])
 					count_m +=1
 				if not pair[1].lower() in heads:
-					heads[pair[1].lower()] = count_h
-					rev_heads.append(pair[1].lower())
+					heads[pair[1]] = count_h
+					rev_heads.append(pair[1])
 					#print(pair[0]+" "+pair[1])
 					count_h +=1
 			
@@ -45,7 +44,7 @@ def cluster_aspects(sourceDir, destDir):
 				mod_asp_d[m][a] = random.random()
 				total += mod_asp_d[m][a]
 			for a in range(naspects):
-				mod_asp_d[m][a] /= total
+				mod_asp_d[m][a] = mod_asp_d[m][a]/total
 
 		for m in range(count_m):
 			for h in range(count_h):
@@ -64,14 +63,17 @@ def cluster_aspects(sourceDir, destDir):
 			for h in range(count_h):
 				aspects_d[a][h] /= total	
 			
-		for i in range(8):
+		for i in range(100):
 			#E step
-			print(('iteration %u')%(i))
+			#print(('iteration %u')%(i))
+			flag = True
 			for m in range(count_m):
 				for h in range(count_h):
 					total = 0
 					for a in range(naspects):
 						total += mod_asp_d[m][a]*aspects_d[a][h]
+					if total == 0:
+						break
 					for a in range(naspects):
 						joint_d[m][h][a] = mod_asp_d[m][a]*aspects_d[a][h]/total
 				#M1 step
@@ -95,14 +97,11 @@ def cluster_aspects(sourceDir, destDir):
 						temph[h] += freq[m][h]*joint_d[m][h][a]  
 					total += temph[h]
 				for h in range(count_h):
+					old = aspects_d[a][h]	
 					aspects_d[a][h] = temph[h]/total
-		for a in range(naspects):
-			pos = 0			
-			for h in range(1,count_h):
-				if aspects_d[a][pos] < aspects_d[a][h]:
-					pos = h
-			print(rev_heads[pos])
-
+					delta += abs(old-aspects_d[a][h])
+			if (delta/(naspects*count_h) < 0.000001):
+				break
 		pickle.dump(heads,open(destDir+"/"+file+".hv",'wb'))
 		pickle.dump(rev_heads,open(destDir+"/"+file+".rhv",'wb'))
 		pickle.dump(modifiers,open(destDir+"/"+file+".mv",'wb'))
@@ -114,4 +113,4 @@ def cluster_aspects(sourceDir, destDir):
 		sys.stderr.write(str(count*100/len(sourceFiles)) +"% completed.\n")
 		
 if __name__ == "__main__":
-	cluster_aspects(str(sys.argv[1]),str(sys.argv[2]))
+	clusterAspects(str(sys.argv[1]),str(sys.argv[2]))
