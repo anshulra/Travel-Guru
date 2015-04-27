@@ -1,19 +1,23 @@
 import os,sys,pickle
-
+#clusterdir chunkdir aspect dir
 def rateAspects(sourceDir, sourceDir1,destDir):
 	sourceFiles = os.listdir(sourceDir1)
 	naspects = 6
+	done = 0	
 	for file in sourceFiles:
-		heads = pickle.load(open(sourceDir+"/"+file+".hv",'rb'))
-		rev_heads = pickle.load(open(sourceDir+"/"+file+".rhv",'rb'))
-		rev_modifiers = pickle.load(open(sourceDir+"/"+file+".rmv",'rb'))
-		aspects_d = pickle.load(open(sourceDir+"/"+file+".adh",'rb'))		
-		modifiers = pickle.load(open(sourceDir+"/"+file+".mv",'rb'))
-		count_h = len(heads)
-		count_m = len(modifiers)
-		mod_asp_d = pickle.load(open(sourceDir+"/"+file+".mda",'rb'))
-		freq = pickle.load(open(sourceDir+"/"+file+".frq",'rb'))
-		reviews = pickle.load(open(sourceDir1+"/"+file,'rb'))
+		try:
+			heads = pickle.load(open(sourceDir+"/"+file+".hv",'rb'))
+			rev_heads = pickle.load(open(sourceDir+"/"+file+".rhv",'rb'))
+			rev_modifiers = pickle.load(open(sourceDir+"/"+file+".rmv",'rb'))
+			aspects_d = pickle.load(open(sourceDir+"/"+file+".adh",'rb'))		
+			modifiers = pickle.load(open(sourceDir+"/"+file+".mv",'rb'))
+			count_h = len(heads)
+			count_m = len(modifiers)
+			mod_asp_d = pickle.load(open(sourceDir+"/"+file+".mda",'rb'))
+			freq = pickle.load(open(sourceDir+"/"+file+".frq",'rb'))
+			reviews = pickle.load(open(sourceDir1+"/"+file,'rb'))
+		except:
+			continue
 		nb = [[[0]*count_m for y in range(naspects)] for x in range(11)]
 		Ah = [0]*count_h 
 		
@@ -68,11 +72,13 @@ def rateAspects(sourceDir, sourceDir1,destDir):
 				#return
 		#normalizing aspect ratings with phrase count for that aspect
 		for a in range(naspects):
-			asp_rating[a]/=2*asp_count[a]
+			if not asp_count[a] == 0:
+				asp_rating[a]/=2*asp_count[a]
 
-		for h in range(count_h):
-			print(('%s \t has rating %f')%(rev_heads[h],asp_rating[Ah[h]]))
+		#for h in range(count_h):
+		#	print(('%s \t has rating %f')%(rev_heads[h],asp_rating[Ah[h]]))
 		pickle.dump(asp_rating,open(destDir+"/"+file+".rate",'wb'))
-
+		done += 1
+		sys.stderr.write(str(done*100/len(sourceFiles))+" Completed.\n")
 if __name__ == "__main__":
 	rateAspects(str(sys.argv[1]),str(sys.argv[2]),str(sys.argv[3]))		

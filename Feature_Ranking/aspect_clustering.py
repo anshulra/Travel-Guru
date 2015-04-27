@@ -3,7 +3,7 @@ import os,sys,pickle,random
 def clusterAspects(sourceDir, destDir):
 	sourceFiles = os.listdir(sourceDir)
 	count = 0
-	naspects = 8
+	naspects = 6
 	for file in sourceFiles:
 		filepath = sourceDir+"/"+file;
 		data = pickle.load(open(filepath,'rb'))
@@ -24,7 +24,8 @@ def clusterAspects(sourceDir, destDir):
 					rev_heads.append(pair[1])
 					#print(pair[0]+" "+pair[1])
 					count_h +=1
-			
+		if count_h == 0:
+			continue	
 		freq = [[0]*count_h for x in range(count_m)]
 		for review in data:
 			for pair in review[1]:
@@ -102,6 +103,12 @@ def clusterAspects(sourceDir, destDir):
 					delta += abs(old-aspects_d[a][h])
 			if (delta/(naspects*count_h) < 0.000001):
 				break
+		#for a in range(naspects):
+		#	pos = 0
+		#	for h in range(1,count_h):
+		#		if aspects_d[a][h] > aspects_d[a][pos]:
+		#			pos = h
+		#	print(("Word %s Prob %f")%(rev_heads[pos],aspects_d[a][pos]))	
 		pickle.dump(heads,open(destDir+"/"+file+".hv",'wb'))
 		pickle.dump(rev_heads,open(destDir+"/"+file+".rhv",'wb'))
 		pickle.dump(modifiers,open(destDir+"/"+file+".mv",'wb'))
@@ -109,6 +116,7 @@ def clusterAspects(sourceDir, destDir):
 		pickle.dump(aspects_d,open(destDir+"/"+file+".adh",'wb'))
 		pickle.dump(joint_d,open(destDir+"/"+file+".joint",'wb'))
 		pickle.dump(mod_asp_d,open(destDir+"/"+file+".mda",'wb'))
+		pickle.dump(freq,open(destDir+"/"+file+".frq",'wb'))
 		count += 1
 		sys.stderr.write(str(count*100/len(sourceFiles)) +"% completed.\n")
 		
