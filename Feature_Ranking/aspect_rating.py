@@ -31,7 +31,7 @@ def rateAspects(sourceDir, sourceDir1,destDir):
 						pos = a
 			Ah[h] = pos
 
-		#naive bayes counts
+		#naive bayes classifier for a modifier m of aspect a to a rating r 
 		for review in reviews:
 			r = int(2*review[0])
 			for f in review[1]:
