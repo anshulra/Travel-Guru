@@ -1,47 +1,38 @@
 import nltk
 import json
-import time
-
-start = time.time()
 
 reviews_per_destination = json.load(open("reviews_per_destination.json", "r"))
-#destinations_per_id = json.load(open("all_destinations.json", "r"))
 
 #POS Tagging
-tagged_reviews_per_desination = {}
+chunked_reviews_per_destination = {}
 
-#Chunking
-patterns = r"""NP: 
-				{<DT|PP\$>?<JJ>*<NN>}
-				{<NNP>+}
-				{<NN>+}
-			""" 	# define a tag pattern of an NP chunk
+#Chunking patterns to detect Noun Phrases
+patterns = r"""
+			NP:
+				{<NN.*|JJ>*<NN.*>}
+				{<NN.*|JJ>*<NN.*><IN><NN.*|JJ>*<NN.*>}  # Above, connected with in/of/etc...
+			"""
 
 NPChunker = nltk.RegexpParser(patterns) 					# create a chunk parser
 
+# For each revview sentence in a destination perform POS tagging. Then perform chunking using nltk.
 for destination_id in reviews_per_destination :
 	
-	pos_tagged_reviews = []
+	chunked_reviews = {}
 
 	reviews = reviews_per_destination[destination_id]
 
-	for review in reviews:
-		review_tokenised = nltk.word_tokenize(review)
+	for review_index in reviews:
+		review_tokenised = nltk.word_tokenize(reviews[review_index].lower())
 		review_pos_tagged = nltk.pos_tag(review_tokenised)
 		
 		review_chunked = NPChunker.parse(review_pos_tagged)
-		'''
-		i = 0
-		while i < len(review_pos_tagged) :
-			review_pos_tagged[i] = "/".join(review_pos_tagged[i])
-			i += 1
-		'''	
-		pos_tagged_reviews.append(review_chunked)
 
-	tagged_reviews_per_desination[destination_id] = pos_tagged_reviews
+		chunked_reviews[review_index] = review_chunked
+		
+	chunked_reviews_per_destination[destination_id] = chunked_reviews
+	
+chunked_json = open("chunked_reviews_per_destination.json", "w")
+json.dump(chunked_reviews_per_destination, chunked_json)
+chunked_json.close()
 
-json.dump(tagged_reviews_per_desination, open("tagged_reviews_per_destination.json", "w"))
-
-end = time.time()
-
-print(end-start)

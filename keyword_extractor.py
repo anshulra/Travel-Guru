@@ -34,6 +34,7 @@ def extract_keywords():
 		text = f_obj.read()
 		text = text.replace("*******************","")
 		doc_len = len(text)
+		print(str(doc_len))
 		text_words = text.split()
 		unigrams_freq = nltk.FreqDist(text_words)
 
@@ -73,11 +74,13 @@ def extract_keywords():
 					if (re.match(myRE,words[1])):
 						t = (words[0],words[1])
 						freq = bigrams_freq[t]
+						loc_hash[loc]["keywords"][keyword] = freq
 			else:
 				if (re.match(myRE,words[0])):
 					freq = unigrams_freq[words[0]]
+					loc_hash[loc]["keywords"][keyword] = freq
 			
-			loc_hash[loc]["keywords"][keyword] = freq	
+				
 		
 	json.dump(loc_hash,out_file)
 
